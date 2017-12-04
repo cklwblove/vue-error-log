@@ -1,0 +1,61 @@
+import _Object$defineProperties from 'babel-runtime/core-js/object/define-properties';
+import Raven from 'raven-js';
+import RavenVue from 'raven-js/plugins/vue';
+
+function plugin(Vue) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  function formatComponentName(vm) {
+    if (vm.$root === vm) return 'root';
+
+    var name = vm._isVue ? vm.$options && vm.$options.name || vm.$options && vm.$options._componentTag : vm.name;
+    return (name ? 'component <' + name + '>' : 'anonymous component') + (vm._isVue && vm.$options && vm.$options.__file ? ' at ' + (vm.$options && vm.$options.__file) : '');
+  }
+
+  if (!options.dsn) {
+    console.warn('sentry dsn must be set value.');
+    return;
+  }
+
+  Raven.config(options.dsn, {
+    release: options.release
+  }).addPlugin(RavenVue, Vue).install();
+
+  Raven.setUserContext({
+    user: options.user || ''
+  });
+
+  Raven.setTagsContext({ environment: options.env });
+
+  require('./globalLog');
+
+  Vue.config.errorHandler = function (err, vm, info) {
+    console.error('这里是errorHandler：' + err);
+    var componentName = formatComponentName(vm);
+    var propsData = vm.$options && vm.$options.propsData;
+
+    Raven.captureException(err, {
+      level: 'error',
+      tags: {
+        svn_commit: 'vue'
+      },
+      extra: {
+        componentName: componentName,
+        propsData: propsData,
+        info: info
+      }
+    });
+  };
+
+  _Object$defineProperties(Vue.prototype, {
+    $raven: { value: Raven, writable: true }
+  });
+}
+
+plugin.version = '__VERSION__';
+
+export default plugin;
+
+if (typeof window !== 'undefined' && window.Vue) {
+  window.Vue.use(plugin);
+}

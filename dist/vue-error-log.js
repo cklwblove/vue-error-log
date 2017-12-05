@@ -1,5 +1,5 @@
 /*!
- * vue-error-log v0.0.2 
+ * vue-error-log v0.0.3 
  * (c) 2017 liwb
  * Combined with sentry, it is convenient to collect the error log on the front end.
  * Released under the MIT License.
@@ -3311,6 +3311,18 @@ window.onerror = function (msg, url, line, col, error) {
   }, 0);
   return true;
 };
+
+// Record Resources load Errors
+window.addEventListener('error', function (e) {
+  var resource = e.target.src || e.target.href;
+  if (resource) {
+    // 把data上报到后台！
+    singleton.captureMessage(("src load error at " + resource), {
+      level: 'error',
+      tags: {svn_commit: 'resources'}
+    });
+  }
+}, true);
 
 function formatComponentName(vm) {
   if (vm.$root === vm) { return 'root'; }

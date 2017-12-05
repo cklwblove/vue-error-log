@@ -1,7 +1,7 @@
 {
   "name": "vue-error-log",
   "description": "Combined with sentry, it is convenient to collect the error log on the front end.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "liwb",
     "email": "lwbhtml@163.com"

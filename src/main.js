@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Raven from 'raven-js';
 import RavenVue from 'raven-js/plugins/vue';
+import './core/globalLog';
 
 function formatComponentName(vm) {
   if (vm.$root === vm) return 'root';
@@ -33,8 +34,6 @@ export default function (options = {}) {
 
   Raven.setTagsContext({environment: options.env});
 
-  // global error
-  require('./core/globalLog');
   // vue errorHandler
   Vue.config.errorHandler = function (err, vm, info) {
     console.error('这里是errorHandler：' + err);

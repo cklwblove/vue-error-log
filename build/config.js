@@ -56,6 +56,7 @@ const builds = {
     env: 'production',
     moduleName,
     banner,
+    external: ['vue'],
     globals: {
       vue: 'Vue'
     }
@@ -68,6 +69,7 @@ const builds = {
     env: 'development',
     moduleName,
     banner,
+    external: ['vue'],
     globals: {
       vue: 'Vue'
     }
@@ -79,7 +81,6 @@ function genConfig(name) {
   const config = {
     input: opts.entry,
     external: opts.external,
-    globals: opts.globals,
     plugins: [
       node(),
       buble(),
@@ -89,7 +90,8 @@ function genConfig(name) {
       file: opts.dest,
       format: opts.format,
       banner: opts.banner,
-      name: opts.moduleName
+      name: opts.moduleName,
+      globals: opts.globals
     }
   }
 

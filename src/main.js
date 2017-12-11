@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import Raven from 'raven-js';
 import RavenVue from 'raven-js/plugins/vue';
 import './core/globalLog';
@@ -16,43 +15,47 @@ function formatComponentName(vm) {
  * Doc:https://docs.sentry.io/clients/javascript/usage/
  * @param {Object} options
  */
-export default function (options = {}) {
-  if (!options.dsn) {
-    console.warn('sentry dsn must be set value.');
-    return;
-  }
+export default {
+  install (Vue, options = {}) {
+    if (!options.dsn) {
+      console.warn('sentry dsn must be set value.');
+      return;
+    }
 
-  Raven.config(options.dsn,
-    {
-      release: options.release
-    })
-    .addPlugin(RavenVue, Vue)
-    .install();
+    Raven.config(options.dsn,
+      {
+        release: options.release
+      })
+      .addPlugin(RavenVue, Vue)
+      .install();
 
-  Raven.setUserContext({
-    user: options.user || ''
-  });
-
-  Raven.setTagsContext({environment: options.env});
-
-  // vue errorHandler
-  Vue.config.errorHandler = function (err, vm, info) {
-    console.error('这里是errorHandler：' + err);
-    const componentName = formatComponentName(vm);
-    const propsData = vm.$options && vm.$options.propsData;
-
-    Raven.captureException(err, {
-      level: 'error',
-      tags: {
-        svn_commit: 'vue'
-      },
-      extra: {
-        componentName: componentName,
-        propsData: propsData,
-        info: info
-      }
+    Raven.setUserContext({
+      user: options.user || ''
     });
-  };
-  // 挂载到vue属性上
-  Vue.prototype.$raven = Raven;
+
+    Raven.setTagsContext({environment: options.env});
+
+    // vue errorHandler
+    Vue.config.errorHandler = function (err, vm, info) {
+      console.error('这里是errorHandler：' + err);
+      const componentName = formatComponentName(vm);
+      const propsData = vm.$options && vm.$options.propsData;
+
+      Raven.captureException(err, {
+        level: 'error',
+        tags: {
+          svn_commit: 'vue'
+        },
+        extra: {
+          componentName: componentName,
+          propsData: propsData,
+          info: info
+        }
+      });
+    };
+    // 挂载到vue属性上
+    Object.defineProperties(Vue.prototype, {
+      $raven: { value: Raven, writable: true }
+    });
+  }
 }

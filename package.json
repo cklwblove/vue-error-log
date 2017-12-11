@@ -46,8 +46,7 @@
     "uglify-js": "^3.0.15"
   },
   "files": [
-    "dist/*.js",
-    "src"
+    "dist"
   ],
   "main": "dist/vue-error-log.min.js",
   "module": "dist/vue-error-log.esm.js",

@@ -1,14 +1,10 @@
 /*!
- * vue-error-log v0.0.3 
+ * vue-error-log v0.0.4 
  * (c) 2017 liwb
  * Combined with sentry, it is convenient to collect the error log on the front end.
  * Released under the MIT License.
  */
 'use strict';
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var Vue = _interopDefault(require('vue'));
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3185,14 +3181,14 @@ function formatComponentName$1(vm) {
   );
 }
 
-function vuePlugin(Raven, Vue$$1) {
-  Vue$$1 = Vue$$1 || window.Vue;
+function vuePlugin(Raven, Vue) {
+  Vue = Vue || window.Vue;
 
   // quit if Vue isn't on the page
-  if (!Vue$$1 || !Vue$$1.config) { return; }
+  if (!Vue || !Vue.config) { return; }
 
-  var _oldOnError = Vue$$1.config.errorHandler;
-  Vue$$1.config.errorHandler = function VueErrorHandler(error, vm, info) {
+  var _oldOnError = Vue.config.errorHandler;
+  Vue.config.errorHandler = function VueErrorHandler(error, vm, info) {
     var metaData = {};
 
     // vm and lifecycleHook are not always available
@@ -3334,47 +3330,51 @@ function formatComponentName(vm) {
  * Doc:https://docs.sentry.io/clients/javascript/usage/
  * @param {Object} options
  */
-var main = function (options) {
-  if ( options === void 0 ) options = {};
+var main = {
+  install: function install (Vue, options) {
+    if ( options === void 0 ) options = {};
 
-  if (!options.dsn) {
-    console.warn('sentry dsn must be set value.');
-    return;
-  }
+    if (!options.dsn) {
+      console.warn('sentry dsn must be set value.');
+      return;
+    }
 
-  singleton.config(options.dsn,
-    {
-      release: options.release
-    })
-    .addPlugin(vue, Vue)
-    .install();
+    singleton.config(options.dsn,
+      {
+        release: options.release
+      })
+      .addPlugin(vue, Vue)
+      .install();
 
-  singleton.setUserContext({
-    user: options.user || ''
-  });
-
-  singleton.setTagsContext({environment: options.env});
-
-  // vue errorHandler
-  Vue.config.errorHandler = function (err, vm, info) {
-    console.error('这里是errorHandler：' + err);
-    var componentName = formatComponentName(vm);
-    var propsData = vm.$options && vm.$options.propsData;
-
-    singleton.captureException(err, {
-      level: 'error',
-      tags: {
-        svn_commit: 'vue'
-      },
-      extra: {
-        componentName: componentName,
-        propsData: propsData,
-        info: info
-      }
+    singleton.setUserContext({
+      user: options.user || ''
     });
-  };
-  // 挂载到vue属性上
-  Vue.prototype.$raven = singleton;
+
+    singleton.setTagsContext({environment: options.env});
+
+    // vue errorHandler
+    Vue.config.errorHandler = function (err, vm, info) {
+      console.error('这里是errorHandler：' + err);
+      var componentName = formatComponentName(vm);
+      var propsData = vm.$options && vm.$options.propsData;
+
+      singleton.captureException(err, {
+        level: 'error',
+        tags: {
+          svn_commit: 'vue'
+        },
+        extra: {
+          componentName: componentName,
+          propsData: propsData,
+          info: info
+        }
+      });
+    };
+    // 挂载到vue属性上
+    Object.defineProperties(Vue.prototype, {
+      $raven: { value: singleton, writable: true }
+    });
+  }
 };
 
 module.exports = main;

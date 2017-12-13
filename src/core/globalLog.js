@@ -87,7 +87,7 @@ window.onerror = function (msg, url, line, col, error) {
     // 把data上报到后台！
     Raven.captureException(processError(error), {
       level: 'error',
-      tags: {svn_commit: 'window'}
+      tags: {custom_commit: 'window'}
     });
   }, 0);
   return true;

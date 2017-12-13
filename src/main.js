@@ -2,6 +2,7 @@ import Raven from 'raven-js';
 import RavenVue from 'raven-js/plugins/vue';
 import './core/globalLog';
 import './core/resourcesLog';
+import './core/promiseLog';
 
 function formatComponentName(vm) {
   if (vm.$root === vm) return 'root';

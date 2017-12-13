@@ -7,7 +7,7 @@ window.addEventListener('error', (e) => {
     // 把data上报到后台！
     Raven.captureMessage(`src load error at ${resource}`, {
       level: 'error',
-      tags: {svn_commit: 'resources'}
+      tags: {custom_commit: 'resources'}
     });
   }
 }, true);

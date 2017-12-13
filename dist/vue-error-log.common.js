@@ -1,5 +1,5 @@
 /*!
- * vue-error-log v0.0.4 
+ * vue-error-log v0.0.5 
  * (c) 2017 liwb
  * Combined with sentry, it is convenient to collect the error log on the front end.
  * Released under the MIT License.
@@ -3300,7 +3300,7 @@ window.onerror = function (msg, url, line, col, error) {
     // 把data上报到后台！
     singleton.captureException(processError(error), {
       level: 'error',
-      tags: {svn_commit: 'window'}
+      tags: {custom_commit: 'window'}
     });
   }, 0);
   return true;
@@ -3313,7 +3313,21 @@ window.addEventListener('error', function (e) {
     // 把data上报到后台！
     singleton.captureMessage(("src load error at " + resource), {
       level: 'error',
-      tags: {svn_commit: 'resources'}
+      tags: {custom_commit: 'resources'}
+    });
+  }
+}, true);
+
+// Promise Errors
+// 异步请求会抛出异常而你并没有处理它，
+// 所以最好添加一个 Promise 全局异常捕获事件 unhandledrejection。
+window.addEventListener('unhandledrejection', function (e) {
+  var reason = e.reason;
+  if (reason) {
+    // 把data上报到后台！
+    singleton.captureMessage(("promise unhandlerejection " + reason), {
+      level: 'error',
+      tags: {custom_commit: 'promise'}
     });
   }
 }, true);

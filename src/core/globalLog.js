@@ -39,13 +39,13 @@ const processError = (errObj) => {
         stack += stack.type ? ('--' + stack.type + '--' + (stack.target ? (stack.target.tagName + '::' + stack.target.src) : '')) : '';
       }
 
-      return {
+      return JSON.stringify({
         msg: stack,
         rowNum: rowCols[1],
         colNum: rowCols[2],
         target: url.replace(rowCols[0], ''),
         _orgMsg: errObj.toString()
-      };
+      });
     } else {
       // ie 独有 error 对象信息，try-catch 捕获到错误信息传过来，造成没有msg
       if (errObj.name && errObj.message && errObj.description) {
